@@ -15,13 +15,25 @@ services:
     web:
         container_name: django
         build: djangoproject/
-        command: python manage.py runserver 0.0.0.0:8000
+        command: >
+            gunicorn djangoproject.wsgi:application --bind 0.0.0.0:8000 --workers=4
         env_file: 
             - project.env
-        ports:
-            - 8000:8000
+        expose:
+            - 8000
         depends_on: 
             - db
     
+    nginx:
+        container_name: nginx
+        image: nginx:mainline-alpine
+        restart: always
+        ports: 
+            - 80:80
+        volumes: 
+            - ./nginx:/etc/nginx/conf.d
+        depends_on: 
+            - web
+
 volumes: 
     postgres-data:
